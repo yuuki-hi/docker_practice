@@ -1,20 +1,36 @@
 version: '3'
 
 services:
+  # nginx:
+  #   image: nginx:1.25.1
+  #   ports:
+  #     - 80:80
+  #   volumes:
+  #     - ./nginx/html:/usr/share/nginx/html
+  #     - ./nginx/conf.d:/etc/nginx/conf.d
+  #   depends_on:
+  #     - flask
+
   nginx:
     image: nginx:1.25.1
     ports:
-      - 8000:80
+      - 80:80
     volumes:
       - ./nginx/html:/usr/share/nginx/html
       - ./nginx/conf.d:/etc/nginx/conf.d
+      - socket:/tmp
     depends_on:
       - flask
 
   flask:
     build: ./flask
     ports:
-      - 8080:80
+      - 8080:8080
     volumes:
       - ./flask/app:/app
+      - socket:/tmp
+    # command: sh -c "uwsgi --ini /app/app.ini"
+    command: sh -c "gunicorn index:app --bind 0.0.0.0:8080"
   
+volumes:
+  socket:
